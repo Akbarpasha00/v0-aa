@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: placement-cms
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        fromDatabase:
+          name: supabase-url
+          property: connectionString
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        fromDatabase:
+          name: supabase-anon-key
+          property: connectionString
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        fromDatabase:
+          name: supabase-service-key
+          property: connectionString
+
+databases:
+  - name: placement-cms-db
+    databaseName: placement_cms
+    user: placement_user
+    plan: free
