@@ -58,8 +58,8 @@ export function DownloadModal({ type, onClose, students }: DownloadModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-[500px] p-6">
+    <div className="fixed inset-0 bg-background/70 flex items-center justify-center z-50">
+      <div className="bg-card rounded-lg w-[500px] p-6">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold">Select Columns to Download</h3>
           <button onClick={onClose}>
@@ -89,13 +89,13 @@ export function DownloadModal({ type, onClose, students }: DownloadModalProps) {
         <div className="flex justify-end gap-4">
           <button
             onClick={onClose}
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50 rounded-button whitespace-nowrap"
+            className="px-4 py-2 border rounded-lg hover:bg-muted/50 rounded-button whitespace-nowrap"
           >
             Cancel
           </button>
           <button
             onClick={handleConfirmDownload}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 rounded-button whitespace-nowrap"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 rounded-button whitespace-nowrap"
             disabled={selectedColumns.length === 0}
           >
             Download
