@@ -33,15 +33,15 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-96">
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="bg-card p-8 rounded-lg shadow-lg w-96">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-primary">PlacementCMS</h2>
-          <p className="text-gray-600 mt-2">Admin Login</p>
+          <p className="text-muted-foreground mt-2">Admin Login</p>
         </div>
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-medium mb-2">Username</label>
+            <label className="block text-foreground text-sm font-medium mb-2">Username</label>
             <input
               type="text"
               value={username}
@@ -52,7 +52,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             />
           </div>
           <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-medium mb-2">Password</label>
+            <label className="block text-foreground text-sm font-medium mb-2">Password</label>
             <input
               type="password"
               value={password}
@@ -63,14 +63,14 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             />
           </div>
           {error && (
-            <div className="bg-red-100 text-red-700 p-3 rounded-lg mb-4">
+            <div className="bg-destructive text-destructive-foreground p-3 rounded-lg mb-4">
               <i className="fas fa-exclamation-circle mr-2"></i>
               {error}
             </div>
           )}
           <button
             type="submit"
-            className="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary/90 transition-colors rounded-button whitespace-nowrap"
+            className="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors rounded-button whitespace-nowrap"
           >
             Login
           </button>
