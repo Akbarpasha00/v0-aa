@@ -1,0 +1,28 @@
+# Google App Engine configuration
+runtime: nodejs18
+
+env_variables:
+  NODE_ENV: production
+  NEXT_PUBLIC_SUPABASE_URL: your-supabase-url
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: your-supabase-anon-key
+  SUPABASE_SERVICE_ROLE_KEY: your-service-role-key
+
+automatic_scaling:
+  min_instances: 0
+  max_instances: 10
+  target_cpu_utilization: 0.6
+
+resources:
+  cpu: 1
+  memory_gb: 1
+  disk_size_gb: 10
+
+handlers:
+  - url: /_next/static
+    static_dir: .next/static
+    expiration: 1y
+
+  - url: /.*
+    script: auto
+    secure: always
+    redirect_http_response_code: 301

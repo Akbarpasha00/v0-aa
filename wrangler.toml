@@ -1,0 +1,27 @@
+name = "placement-cms"
+main = "src/index.ts"
+compatibility_date = "2024-01-15"
+compatibility_flags = ["nodejs_compat"]
+
+[env.production]
+name = "placement-cms-prod"
+
+[env.staging]
+name = "placement-cms-staging"
+
+# Environment variables (set these using wrangler secret put)
+[vars]
+NODE_ENV = "production"
+NEXT_PUBLIC_APP_URL = "https://placement-cms.your-domain.workers.dev"
+
+# KV namespace for data storage
+[[kv_namespaces]]
+binding = "PLACEMENT_DATA"
+id = "your-kv-namespace-id"
+preview_id = "your-preview-kv-namespace-id"
+
+# D1 database for structured data
+[[d1_databases]]
+binding = "DB"
+database_name = "placement-cms-db"
+database_id = "your-database-id"
