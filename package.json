@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
     "build": "wrangler deploy --dry-run",
+    "cf:login": "wrangler auth login",
+    "cf:whoami": "wrangler auth whoami",
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
     "start": "wrangler dev"
   },
   "dependencies": {
-    "@radix-ui/react-slot": "latest",
-    "@types/react": "latest",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "echarts": "latest",
@@ -24,13 +24,13 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20231218.0",
+    "@cloudflare/workers-types": "^4.20240117.0",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "postcss": "^8.5",
     "typescript": "^5",
-    "wrangler": "^3.22.1"
+    "wrangler": "^3.78.12"
   },
   "engines": {
     "node": ">=18.0.0"

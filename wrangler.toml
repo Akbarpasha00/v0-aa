@@ -1,28 +1,19 @@
 name = "placement-cms"
 main = "src/index.ts"
-compatibility_date = "2023-12-01"
-
-# Use the latest Node.js compatibility
+compatibility_date = "2024-01-15"
 compatibility_flags = ["nodejs_compat"]
-
-# Routes
-routes = [
-  { pattern = "/api/*", zone_name = "" },
-  { pattern = "/*", zone_name = "" }
-]
 
 # Environment variables
 [vars]
 NODE_ENV = "production"
 
-# KV namespace for data storage (uncomment and update after creating)
+# Uncomment and configure after creating resources
 # [[kv_namespaces]]
 # binding = "PLACEMENT_DATA"
-# id = ""
-# preview_id = ""
+# id = "your-kv-namespace-id"
+# preview_id = "your-preview-kv-namespace-id"
 
-# D1 database (uncomment and update after creating)
 # [[d1_databases]]
 # binding = "DB"
 # database_name = "placement-cms-db"
-# database_id = ""
+# database_id = "your-database-id"
