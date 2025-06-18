@@ -181,7 +181,7 @@ app.post("/api/logout", (c) => {
   return c.redirect("/login")
 })
 
-// Protected dashboard route
+// Protected dashboard route - COMPLETE CMS DASHBOARD
 app.get("/dashboard", requireAuth, (c) => {
   const userInfo = getCookie(c, "user_info")
   let user = { username: "User", role: "User" }
@@ -203,121 +203,508 @@ app.get("/dashboard", requireAuth, (c) => {
     <title>Dashboard - Placement CMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center py-4">
-                <div class="flex items-center">
-                    <h1 class="text-2xl font-bold text-blue-600">🎓 Placement CMS</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="text-sm">
-                        <span class="text-gray-600">Welcome,</span>
-                        <span class="font-medium text-gray-900">${user.username}</span>
-                        <span class="text-xs text-gray-500 ml-1">(${user.role})</span>
-                    </div>
-                    <form method="POST" action="/api/logout" class="inline">
-                        <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors text-sm">
-                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
-                        </button>
-                    </form>
-                </div>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-lg">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-blue-600">🎓 Placement CMS</h1>
+                <p class="text-sm text-gray-500 mt-1">College Management</p>
             </div>
+            
+            <nav class="mt-6">
+                <div class="px-6 py-2">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Main</p>
+                </div>
+                <a href="#" onclick="showSection('dashboard')" class="nav-item active flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                    <i class="fas fa-home w-5 h-5 mr-3"></i>
+                    Dashboard
+                </a>
+                <a href="#" onclick="showSection('students')" class="nav-item flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                    <i class="fas fa-user-graduate w-5 h-5 mr-3"></i>
+                    Students
+                </a>
+                <a href="#" onclick="showSection('companies')" class="nav-item flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                    <i class="fas fa-building w-5 h-5 mr-3"></i>
+                    Companies
+                </a>
+                <a href="#" onclick="showSection('placements')" class="nav-item flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                    <i class="fas fa-handshake w-5 h-5 mr-3"></i>
+                    Placements
+                </a>
+                <a href="#" onclick="showSection('tpo')" class="nav-item flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                    <i class="fas fa-user-tie w-5 h-5 mr-3"></i>
+                    TPO Dashboard
+                </a>
+                <a href="#" onclick="showSection('eligibility')" class="nav-item flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                    <i class="fas fa-check-circle w-5 h-5 mr-3"></i>
+                    Eligibility
+                </a>
+                <a href="#" onclick="showSection('whatsapp')" class="nav-item flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                    <i class="fab fa-whatsapp w-5 h-5 mr-3"></i>
+                    WhatsApp
+                </a>
+                
+                <div class="px-6 py-2 mt-6">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Account</p>
+                </div>
+                <form method="POST" action="/api/logout" class="px-6">
+                    <button type="submit" class="w-full flex items-center py-3 text-gray-700 hover:bg-red-50 hover:text-red-600">
+                        <i class="fas fa-sign-out-alt w-5 h-5 mr-3"></i>
+                        Logout
+                    </button>
+                </form>
+            </nav>
         </div>
-    </header>
 
-    <div class="container mx-auto px-4 py-8">
-        <div class="max-w-6xl mx-auto">
-            <!-- Welcome Message -->
-            <div class="bg-white rounded-lg shadow-xl p-6 mb-8">
-                <div class="text-center">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Welcome to Your Dashboard</h2>
-                    <p class="text-gray-600">College Placement Management System</p>
-                    <div class="inline-flex items-center bg-green-100 px-4 py-2 rounded-full mt-4">
-                        <span class="text-green-800 font-semibold">✅ Successfully Authenticated</span>
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div>
+                        <h2 id="page-title" class="text-2xl font-semibold text-gray-800">Dashboard</h2>
+                        <p class="text-sm text-gray-600">Welcome back, ${user.username} (${user.role})</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="p-2 text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                            ${user.username.charAt(0).toUpperCase()}
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Stats Grid -->
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" id="stats-grid">
-                <div class="bg-blue-100 p-6 rounded-lg text-center hover:shadow-lg transition-shadow">
-                    <div class="text-4xl mb-3">👥</div>
-                    <h3 class="text-xl font-bold text-blue-800 mb-2">Students</h3>
-                    <p class="text-blue-600 mb-2">Registered students</p>
-                    <div class="text-2xl font-bold text-blue-700" id="students-count">Loading...</div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- Dashboard Section -->
+                <div id="dashboard-section" class="content-section">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-blue-100 rounded-lg">
+                                    <i class="fas fa-user-graduate text-blue-600 text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">Total Students</p>
+                                    <p class="text-2xl font-semibold text-gray-900">1,234</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-green-100 rounded-lg">
+                                    <i class="fas fa-building text-green-600 text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">Companies</p>
+                                    <p class="text-2xl font-semibold text-gray-900">56</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-purple-100 rounded-lg">
+                                    <i class="fas fa-handshake text-purple-600 text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">Placements</p>
+                                    <p class="text-2xl font-semibold text-gray-900">789</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-orange-100 rounded-lg">
+                                    <i class="fas fa-chart-line text-orange-600 text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">Success Rate</p>
+                                    <p class="text-2xl font-semibold text-gray-900">85%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Activities</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                                    <p class="text-sm text-gray-600">New student registered: John Doe</p>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                                    <p class="text-sm text-gray-600">Company TechCorp added new job posting</p>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
+                                    <p class="text-sm text-gray-600">Placement confirmed: Jane Smith at InnovateLabs</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button onclick="showSection('students')" class="p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                                    <i class="fas fa-user-plus text-blue-600 text-xl mb-2"></i>
+                                    <p class="text-sm font-medium text-blue-600">Add Student</p>
+                                </button>
+                                <button onclick="showSection('companies')" class="p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                                    <i class="fas fa-building text-green-600 text-xl mb-2"></i>
+                                    <p class="text-sm font-medium text-green-600">Add Company</p>
+                                </button>
+                                <button onclick="showSection('placements')" class="p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+                                    <i class="fas fa-handshake text-purple-600 text-xl mb-2"></i>
+                                    <p class="text-sm font-medium text-purple-600">New Placement</p>
+                                </button>
+                                <button onclick="showSection('tpo')" class="p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
+                                    <i class="fas fa-chart-bar text-orange-600 text-xl mb-2"></i>
+                                    <p class="text-sm font-medium text-orange-600">View Reports</p>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="bg-green-100 p-6 rounded-lg text-center hover:shadow-lg transition-shadow">
-                    <div class="text-4xl mb-3">🏢</div>
-                    <h3 class="text-xl font-bold text-green-800 mb-2">Companies</h3>
-                    <p class="text-green-600 mb-2">Partner companies</p>
-                    <div class="text-2xl font-bold text-green-700" id="companies-count">Loading...</div>
+
+                <!-- Students Section -->
+                <div id="students-section" class="content-section hidden">
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-6 border-b">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-lg font-semibold text-gray-800">Student Management</h3>
+                                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                    <i class="fas fa-plus mr-2"></i>Add Student
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead>
+                                        <tr class="border-b">
+                                            <th class="text-left py-3 px-4 font-medium text-gray-600">Name</th>
+                                            <th class="text-left py-3 px-4 font-medium text-gray-600">Email</th>
+                                            <th class="text-left py-3 px-4 font-medium text-gray-600">Course</th>
+                                            <th class="text-left py-3 px-4 font-medium text-gray-600">Year</th>
+                                            <th class="text-left py-3 px-4 font-medium text-gray-600">Status</th>
+                                            <th class="text-left py-3 px-4 font-medium text-gray-600">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b hover:bg-gray-50">
+                                            <td class="py-3 px-4">John Doe</td>
+                                            <td class="py-3 px-4">john@example.com</td>
+                                            <td class="py-3 px-4">Computer Science</td>
+                                            <td class="py-3 px-4">2024</td>
+                                            <td class="py-3 px-4"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Active</span></td>
+                                            <td class="py-3 px-4">
+                                                <button class="text-blue-600 hover:text-blue-800 mr-2"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr class="border-b hover:bg-gray-50">
+                                            <td class="py-3 px-4">Jane Smith</td>
+                                            <td class="py-3 px-4">jane@example.com</td>
+                                            <td class="py-3 px-4">Electronics</td>
+                                            <td class="py-3 px-4">2024</td>
+                                            <td class="py-3 px-4"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Placed</span></td>
+                                            <td class="py-3 px-4">
+                                                <button class="text-blue-600 hover:text-blue-800 mr-2"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="bg-purple-100 p-6 rounded-lg text-center hover:shadow-lg transition-shadow">
-                    <div class="text-4xl mb-3">✅</div>
-                    <h3 class="text-xl font-bold text-purple-800 mb-2">Placements</h3>
-                    <p class="text-purple-600 mb-2">Successful placements</p>
-                    <div class="text-2xl font-bold text-purple-700" id="placements-count">Loading...</div>
+
+                <!-- Companies Section -->
+                <div id="companies-section" class="content-section hidden">
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-6 border-b">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-lg font-semibold text-gray-800">Company Management</h3>
+                                <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                                    <i class="fas fa-plus mr-2"></i>Add Company
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <div class="flex items-center mb-3">
+                                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-building text-blue-600"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h4 class="font-medium text-gray-800">TechCorp Inc.</h4>
+                                            <p class="text-sm text-gray-600">Technology</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mb-2">📍 San Francisco</p>
+                                    <p class="text-sm text-gray-600 mb-3">✉️ hr@techcorp.com</p>
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></button>
+                                        <button class="text-green-600 hover:text-green-800"><i class="fas fa-eye"></i></button>
+                                        <button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </div>
+                                
+                                <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <div class="flex items-center mb-3">
+                                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-building text-green-600"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h4 class="font-medium text-gray-800">InnovateLabs</h4>
+                                            <p class="text-sm text-gray-600">Software</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mb-2">📍 New York</p>
+                                    <p class="text-sm text-gray-600 mb-3">✉️ careers@innovatelabs.com</p>
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></button>
+                                        <button class="text-green-600 hover:text-green-800"><i class="fas fa-eye"></i></button>
+                                        <button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="bg-orange-100 p-6 rounded-lg text-center hover:shadow-lg transition-shadow">
-                    <div class="text-4xl mb-3">📊</div>
-                    <h3 class="text-xl font-bold text-orange-800 mb-2">Success Rate</h3>
-                    <p class="text-orange-600 mb-2">Placement success</p>
-                    <div class="text-2xl font-bold text-orange-700" id="success-rate">Loading...</div>
+
+                <!-- Placements Section -->
+                <div id="placements-section" class="content-section hidden">
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-6 border-b">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-lg font-semibold text-gray-800">Placement Management</h3>
+                                <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+                                    <i class="fas fa-plus mr-2"></i>Record Placement
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h4 class="font-medium text-gray-800">Jane Smith → InnovateLabs</h4>
+                                            <p class="text-sm text-gray-600">Software Developer Position</p>
+                                            <p class="text-sm text-gray-500 mt-1">Placed on: March 15, 2024</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="font-medium text-green-600">₹12,00,000 LPA</p>
+                                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Confirmed</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h4 class="font-medium text-gray-800">Bob Johnson → TechCorp Inc.</h4>
+                                            <p class="text-sm text-gray-600">Backend Engineer Position</p>
+                                            <p class="text-sm text-gray-500 mt-1">Placed on: March 10, 2024</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="font-medium text-green-600">₹15,00,000 LPA</p>
+                                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Pending</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Quick Actions -->
-            <div class="bg-white rounded-lg shadow-xl p-6 mb-8">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">Quick Actions</h3>
-                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <button class="bg-blue-500 text-white p-4 rounded-lg hover:bg-blue-600 transition-colors">
-                        <i class="fas fa-user-plus text-2xl mb-2"></i>
-                        <div class="font-medium">Add Student</div>
-                    </button>
-                    <button class="bg-green-500 text-white p-4 rounded-lg hover:bg-green-600 transition-colors">
-                        <i class="fas fa-building text-2xl mb-2"></i>
-                        <div class="font-medium">Add Company</div>
-                    </button>
-                    <button class="bg-purple-500 text-white p-4 rounded-lg hover:bg-purple-600 transition-colors">
-                        <i class="fas fa-handshake text-2xl mb-2"></i>
-                        <div class="font-medium">New Placement</div>
-                    </button>
-                    <button class="bg-orange-500 text-white p-4 rounded-lg hover:bg-orange-600 transition-colors">
-                        <i class="fas fa-chart-bar text-2xl mb-2"></i>
-                        <div class="font-medium">View Reports</div>
-                    </button>
+
+                <!-- TPO Section -->
+                <div id="tpo-section" class="content-section hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">TPO Analytics</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Placement Target</span>
+                                    <span class="font-medium">1000 students</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Current Placements</span>
+                                    <span class="font-medium text-green-600">789 students</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Remaining</span>
+                                    <span class="font-medium text-orange-600">211 students</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-green-600 h-2 rounded-full" style="width: 78.9%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Reports</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+                                    <span class="text-sm">Monthly Placement Report</span>
+                                    <button class="text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+                                    <span class="text-sm">Company Feedback Summary</span>
+                                    <button class="text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+
+                <!-- Eligibility Section -->
+                <div id="eligibility-section" class="content-section hidden">
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-6 border-b">
+                            <h3 class="text-lg font-semibold text-gray-800">Eligibility Criteria Management</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <div class="border rounded-lg p-4">
+                                    <h4 class="font-medium text-gray-800 mb-2">TechCorp Inc. - Software Developer</h4>
+                                    <div class="grid grid-cols-2 gap-4 text-sm">
+                                        <div>
+                                            <span class="text-gray-600">Min CGPA:</span>
+                                            <span class="font-medium ml-2">7.5</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-600">Eligible Branches:</span>
+                                            <span class="font-medium ml-2">CSE, IT, ECE</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-600">Max Backlogs:</span>
+                                            <span class="font-medium ml-2">0</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-600">Eligible Students:</span>
+                                            <span class="font-medium ml-2 text-green-600">234</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WhatsApp Section -->
+                <div id="whatsapp-section" class="content-section hidden">
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-6 border-b">
+                            <h3 class="text-lg font-semibold text-gray-800">WhatsApp Integration</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="font-medium text-gray-800 mb-4">Send Notifications</h4>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Message Type</label>
+                                            <select class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                                                <option>Placement Update</option>
+                                                <option>Interview Schedule</option>
+                                                <option>Document Reminder</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Recipients</label>
+                                            <select class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                                                <option>All Students</option>
+                                                <option>Final Year Students</option>
+                                                <option>Eligible Students</option>
+                                            </select>
+                                        </div>
+                                        <button class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">
+                                            <i class="fab fa-whatsapp mr-2"></i>Send Message
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="font-medium text-gray-800 mb-4">Recent Messages</h4>
+                                    <div class="space-y-3">
+                                        <div class="p-3 bg-green-50 rounded border-l-4 border-green-500">
+                                            <p class="text-sm font-medium">Interview Schedule - TechCorp</p>
+                                            <p class="text-xs text-gray-600">Sent to 45 students • 2 hours ago</p>
+                                        </div>
+                                        <div class="p-3 bg-blue-50 rounded border-l-4 border-blue-500">
+                                            <p class="text-sm font-medium">Document Submission Reminder</p>
+                                            <p class="text-xs text-gray-600">Sent to 123 students • 1 day ago</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
-    
+
     <script>
-        // Load dashboard stats
-        async function loadStats() {
-            try {
-                const response = await fetch('/api/stats');
-                const result = await response.json();
-                
-                if (result.success) {
-                    const stats = result.data;
-                    document.getElementById('students-count').textContent = stats.students.toLocaleString();
-                    document.getElementById('companies-count').textContent = stats.companies.toLocaleString();
-                    document.getElementById('placements-count').textContent = stats.placements.toLocaleString();
-                    document.getElementById('success-rate').textContent = stats.success_rate + '%';
-                }
-            } catch (error) {
-                console.error('Error loading stats:', error);
-            }
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => section.classList.add('hidden'));
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').classList.remove('hidden');
+            
+            // Update navigation
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active', 'bg-blue-50', 'text-blue-600'));
+            
+            // Add active class to clicked nav item
+            event.target.closest('.nav-item').classList.add('active', 'bg-blue-50', 'text-blue-600');
+            
+            // Update page title
+            const titles = {
+                'dashboard': 'Dashboard',
+                'students': 'Student Management',
+                'companies': 'Company Management', 
+                'placements': 'Placement Management',
+                'tpo': 'TPO Dashboard',
+                'eligibility': 'Eligibility Management',
+                'whatsapp': 'WhatsApp Integration'
+            };
+            
+            document.getElementById('page-title').textContent = titles[sectionName] || 'Dashboard';
         }
         
-        document.addEventListener('DOMContentLoaded', loadStats);
+        // Initialize with dashboard active
+        document.addEventListener('DOMContentLoaded', function() {
+            showSection('dashboard');
+        });
     </script>
+
+    <style>
+        .nav-item.active {
+            background-color: #eff6ff;
+            color: #2563eb;
+            border-right: 3px solid #2563eb;
+        }
+    </style>
 </body>
 </html>`
 
