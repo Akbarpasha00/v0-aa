@@ -1,4 +1,4 @@
-name = "placement-cms"
+name = "placement-cms-v2"
 main = "src/index.ts"
 compatibility_date = "2024-01-15"
 compatibility_flags = ["nodejs_compat"]
@@ -6,6 +6,7 @@ compatibility_flags = ["nodejs_compat"]
 # Environment variables
 [vars]
 NODE_ENV = "production"
+APP_NAME = "Placement CMS"
 
 # Uncomment and configure after creating resources
 # [[kv_namespaces]]

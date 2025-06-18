@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Deploying Placement CMS to Cloudflare Workers (v4 Compatible)"
-echo "=================================================="
+echo "🚀 Deploying Placement CMS to Cloudflare Workers"
+echo "================================================"
 
 # Check if wrangler is installed
 if ! command -v wrangler &> /dev/null; then
@@ -19,6 +19,7 @@ echo "🔐 Checking authentication..."
 if ! wrangler auth whoami &> /dev/null; then
     echo "❌ Not authenticated with Cloudflare. Please run:"
     echo "   wrangler auth login"
+    echo "   Then run this script again"
     exit 1
 fi
 
@@ -29,13 +30,12 @@ echo "📦 Installing dependencies..."
 npm install
 
 # Validate configuration
-echo "🔍 Validating wrangler.toml..."
+echo "🔍 Validating configuration..."
 if [ ! -f "wrangler.toml" ]; then
     echo "❌ wrangler.toml not found!"
     exit 1
 fi
 
-# Check if src/index.ts exists
 if [ ! -f "src/index.ts" ]; then
     echo "❌ src/index.ts not found!"
     exit 1
@@ -43,37 +43,42 @@ fi
 
 echo "✅ Configuration validated"
 
+# Get worker name from wrangler.toml
+WORKER_NAME=$(grep "^name" wrangler.toml | cut -d'"' -f2)
+echo "🏷️  Worker name: $WORKER_NAME"
+
 # Deploy to Cloudflare Workers
+echo ""
 echo "🚀 Deploying to Cloudflare Workers..."
 echo "This may take a few minutes..."
 
 if wrangler deploy; then
     echo ""
     echo "🎉 Deployment successful!"
-    echo "=================================================="
+    echo "================================================"
     echo ""
-    echo "✅ Your Placement CMS is now live on Cloudflare Workers!"
+    echo "✅ Your Placement CMS is now live!"
+    echo "🌐 Worker URL: https://$WORKER_NAME.your-subdomain.workers.dev"
     echo ""
     echo "📋 Next steps:"
-    echo "1. Visit your Worker URL to see the application"
-    echo "2. Optional: Set up D1 database for persistent data"
-    echo "3. Optional: Configure custom domain"
+    echo "1. Visit your Worker URL to test the application"
+    echo "2. Optional: Set up custom domain"
+    echo "3. Optional: Configure D1 database for data persistence"
     echo ""
     echo "🔧 Useful commands:"
-    echo "• View logs: wrangler tail"
+    echo "• View logs: wrangler tail $WORKER_NAME"
     echo "• Local development: wrangler dev"
-    echo "• Check deployment: wrangler deployments list"
+    echo "• List deployments: wrangler deployments list"
     echo ""
 else
     echo ""
     echo "❌ Deployment failed!"
-    echo "=================================================="
+    echo "================================================"
     echo ""
-    echo "🔍 Troubleshooting steps:"
-    echo "1. Check your authentication: wrangler auth whoami"
-    echo "2. Verify your account has Workers enabled"
-    echo "3. Check for any syntax errors in src/index.ts"
-    echo "4. Try deploying with verbose output: wrangler deploy --verbose"
+    echo "🔍 Common solutions:"
+    echo "1. Run: ./fix-worker-name.sh"
+    echo "2. Check authentication: wrangler auth whoami"
+    echo "3. Try with verbose output: wrangler deploy --verbose"
     echo ""
     exit 1
 fi
