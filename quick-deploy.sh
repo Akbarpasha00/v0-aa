@@ -160,6 +160,42 @@ EOF
     echo
     echo "Cost: Pay only for requests (very cost-effective)"
     echo "Perfect for: Production applications with variable traffic"
+
+    echo "====================================="
+    echo "Deploying to Cloudflare Workers..."
+    echo "====================================="
+
+    # Generate unique name
+    TIMESTAMP=$(date +%s)
+    UNIQUE_NAME="placement-cms-$TIMESTAMP"
+
+    echo "📝 Updating worker name to: $UNIQUE_NAME"
+
+    # Update wrangler.toml with unique name
+    cat > wrangler.toml << EOF
+name = "$UNIQUE_NAME"
+main = "src/index.ts"
+compatibility_date = "2024-01-15"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+NODE_ENV = "production"
+APP_NAME = "Placement CMS"
+EOF
+
+    echo "✅ Updated wrangler.toml"
+
+    # Install dependencies
+    echo "📦 Installing dependencies..."
+    npm install
+
+    # Deploy
+    echo "🚀 Deploying..."
+    npx wrangler deploy
+
+    echo ""
+    echo "🎉 Deployment complete!"
+    echo "🌐 Your app should be available at: https://$UNIQUE_NAME.your-subdomain.workers.dev"
 }
 
 main "$@"
