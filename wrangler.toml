@@ -1,20 +1,29 @@
-name = "placement-cms-v2"
+name = "placement-cms"
 main = "src/index.ts"
-compatibility_date = "2024-01-15"
+compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Environment variables
+[env.production]
+name = "placement-cms-prod"
+
+[env.staging]
+name = "placement-cms-staging"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "placement-cms-db"
+database_id = "your-database-id"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "your-kv-namespace-id"
+
 [vars]
-NODE_ENV = "production"
-APP_NAME = "Placement CMS"
+ENVIRONMENT = "production"
+API_VERSION = "v1"
 
-# Uncomment and configure after creating resources
-# [[kv_namespaces]]
-# binding = "PLACEMENT_DATA"
-# id = "your-kv-namespace-id"
-# preview_id = "your-preview-kv-namespace-id"
+[build]
+command = "npm run build"
 
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "placement-cms-db"
-# database_id = "your-database-id"
+[site]
+bucket = "./dist"

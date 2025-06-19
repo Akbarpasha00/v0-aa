@@ -1,157 +1,272 @@
 "use client"
 
-import { useState } from "react"
-import { AddStudentModal } from "@/components/modals/add-student-modal"
-import { DownloadModal } from "@/components/modals/download-modal"
-import { students } from "@/data/mock-data"
+import React, { useState, useEffect } from "react"
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Input,
+  Button,
+  DropdownTrigger,
+  Dropdown,
+  DropdownMenu,
+  DropdownItem,
+  Chip,
+  Tooltip,
+} from "@nextui-org/react"
+import { PlusIcon } from "@/components/icons"
+import { SearchIcon } from "@/components/icons"
+import { VerticalDotsIcon } from "@/components/icons"
+import { columns, statusOptions } from "@/utils/data"
 
-export function StudentsContent() {
-  const [showAddStudent, setShowAddStudent] = useState(false)
-  const [showDownloadModal, setShowDownloadModal] = useState(false)
-  const [downloadType, setDownloadType] = useState("")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedBranch, setSelectedBranch] = useState("")
-  const [selectedCGPA, setSelectedCGPA] = useState("")
+export default function StudentsContent() {
+  const [filterValue, setFilterValue] = useState("")
+  const [selectedStatus, setSelectedStatus] = useState(new Set([]))
+  const [rowsPerPage, setRowsPerPage] = useState(5)
+  const [sortDescriptor, setSortDescriptor] = useState({
+    column: "age",
+    direction: "ascending",
+  })
+  const [page, setPage] = useState(1)
 
-  const handleDownload = (type: string) => {
-    setDownloadType(type)
-    setShowDownloadModal(true)
+  const [students, setStudents] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchStudents = async () => {
+    try {
+      const response = await fetch("/api/students")
+      const result = await response.json()
+      if (result.success) {
+        setStudents(result.data)
+      }
+    } catch (error) {
+      console.error("Failed to fetch students:", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const filteredStudents = students.filter((student) => {
-    const matchesSearch =
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.rollNo.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesBranch = !selectedBranch || student.branch === selectedBranch
-    const matchesCGPA =
-      !selectedCGPA ||
-      (selectedCGPA === "9-10"
-        ? student.btechPercentage >= 90
-        : selectedCGPA === "8-9"
-          ? student.btechPercentage >= 80 && student.btechPercentage < 90
-          : selectedCGPA === "7-8"
-            ? student.btechPercentage >= 70 && student.btechPercentage < 80
-            : selectedCGPA === "6-7"
-              ? student.btechPercentage >= 60 && student.btechPercentage < 70
-              : true)
-    return matchesSearch && matchesBranch && matchesCGPA
-  })
+  useEffect(() => {
+    fetchStudents()
+  }, [])
+
+  const filteredItems = React.useMemo(() => {
+    let filteredStudents = [...students]
+
+    if (filterValue) {
+      filteredStudents = filteredStudents.filter((student) =>
+        student.name.toLowerCase().includes(filterValue.toLowerCase()),
+      )
+    }
+    if (selectedStatus.size > 0) {
+      filteredStudents = filteredStudents.filter((student) => Array.from(selectedStatus).includes(student.status))
+    }
+
+    return filteredStudents
+  }, [students, filterValue, selectedStatus])
+
+  const sortedItems = React.useMemo(() => {
+    return [...filteredItems].sort((a, b) => {
+      const first = a[sortDescriptor.column]
+      const second = b[sortDescriptor.column]
+      const cmp = first < second ? -1 : first > second ? 1 : 0
+
+      return sortDescriptor.direction === "descending" ? -cmp : cmp
+    })
+  }, [filteredItems, sortDescriptor])
+
+  const pages = Math.ceil(filteredItems.length / rowsPerPage)
+
+  const items = React.useMemo(() => {
+    const start = (page - 1) * rowsPerPage
+    const end = start + rowsPerPage
+
+    return sortedItems.slice(start, end)
+  }, [sortedItems, page, rowsPerPage])
+
+  const renderCell = React.useCallback((student, columnKey) => {
+    const cellValue = student[columnKey]
+
+    switch (columnKey) {
+      case "name":
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize">{cellValue}</p>
+            <p className="text-tiny text-default-400 capitalize">{student.email}</p>
+          </div>
+        )
+      case "age":
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize">{cellValue}</p>
+          </div>
+        )
+      case "city":
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize">{cellValue}</p>
+          </div>
+        )
+      case "status":
+        return (
+          <Chip className="capitalize" color={student.statusColor} size="sm" variant="flat">
+            {cellValue}
+          </Chip>
+        )
+      case "actions":
+        return (
+          <div className="relative flex justify-end items-center gap-2">
+            <Tooltip content="Details">
+              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">{/* <EyeIcon /> */}</span>
+            </Tooltip>
+            <Dropdown placement="bottom-end">
+              <DropdownTrigger>
+                <Button isIconOnly size="sm" className="bg-transparent text-default-500 shadow-none">
+                  <VerticalDotsIcon />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu>
+                <DropdownItem>View</DropdownItem>
+                <DropdownItem>Edit</DropdownItem>
+                <DropdownItem className="text-danger">Delete</DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+        )
+      default:
+        return cellValue
+    }
+  }, [])
+
+  const onRowsPerPageChange = React.useCallback((e) => {
+    setRowsPerPage(Number(e.target.value))
+    setPage(1)
+  }, [])
+
+  const onSearchChange = React.useCallback((value) => {
+    if (value === "") {
+      setFilterValue("")
+    } else {
+      setFilterValue(value)
+    }
+    setPage(1)
+  }, [])
+
+  const onClear = React.useCallback(() => {
+    setFilterValue("")
+    setPage(1)
+  }, [])
+
+  const onStatusChange = React.useCallback((value) => {
+    setSelectedStatus(new Set(value))
+    setPage(1)
+  }, [])
+
+  const topContent = React.useMemo(() => {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-between items-end">
+          <Input
+            isClearable
+            className="w-full sm:max-w-[44%]"
+            placeholder="Search by name..."
+            startContent={<SearchIcon className="text-default-300" />}
+            value={filterValue}
+            onClear={() => onClear()}
+            onValueChange={onSearchChange}
+          />
+          <div className="flex gap-3">
+            <Dropdown>
+              <DropdownTrigger>
+                <Button
+                  disableRipple
+                  className="bg-transparent border-default-200 border rounded-lg"
+                  variant="bordered"
+                >
+                  Status
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                disallowEmptySelection
+                aria-label="Table Columns"
+                closeOnSelect={false}
+                selectedKeys={selectedStatus}
+                onSelectionChange={onStatusChange}
+              >
+                {statusOptions.map((status) => (
+                  <DropdownItem key={status.value} className="capitalize">
+                    {status.label}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+            <Button color="primary" endContent={<PlusIcon />}>
+              Add new
+            </Button>
+          </div>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-default-400 text-small">Total {students.length} students</span>
+          <label className="flex items-center text-default-400 text-small">
+            Rows per page:
+            <select
+              className="bg-transparent border-none outline-none text-default-400 text-small"
+              onChange={onRowsPerPageChange}
+            >
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="15">15</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    )
+  }, [filterValue, selectedStatus, onClear, onSearchChange, onStatusChange, onRowsPerPageChange, students.length])
+
+  const bottomContent = React.useMemo(() => {
+    return (
+      <div className="py-2 px-2 flex justify-between items-center">
+        <span className="w-[30%] text-small text-default-400">{`${page} - ${pages} of ${students.length} pages`}</span>
+        <div className="flex gap-2">
+          <Button isDisabled={page === 1} onClick={() => setPage(page - 1)} size="sm" variant="flat">
+            Previous
+          </Button>
+          <Button isDisabled={page === pages} onClick={() => setPage(page + 1)} size="sm" variant="flat">
+            Next
+          </Button>
+        </div>
+      </div>
+    )
+  }, [students.length, page, pages])
+
+  const headerColumns = columns
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex gap-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search students..."
-              className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 text-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-          </div>
-          <select
-            className="border rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
-            value={selectedBranch}
-            onChange={(e) => setSelectedBranch(e.target.value)}
-          >
-            <option value="">All Branches</option>
-            <option value="Computer Science">Computer Science</option>
-            <option value="Electronics">Electronics</option>
-            <option value="Mechanical">Mechanical</option>
-          </select>
-        </div>
-        <div className="flex gap-3">
-          <label className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 cursor-pointer rounded-button whitespace-nowrap">
-            <i className="fas fa-file-excel mr-2"></i>Bulk Upload
-            <input
-              type="file"
-              accept=".xlsx,.xls"
-              className="hidden"
-              onChange={(e) => {
-                if (e.target.files && e.target.files[0]) {
-                  // Handle file upload logic here
-                  console.log("File selected:", e.target.files[0].name)
-                }
-              }}
-            />
-          </label>
-          <button
-            onClick={() => handleDownload("students")}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 rounded-button whitespace-nowrap"
-          >
-            <i className="fas fa-download mr-2"></i>Download
-          </button>
-          <button
-            onClick={() => setShowAddStudent(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 rounded-button whitespace-nowrap"
-          >
-            <i className="fas fa-plus mr-2"></i>Add Student
-          </button>
-        </div>
-      </div>
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Name</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Roll No</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Branch</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">BTech %</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Status</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filteredStudents.map((student, index) => (
-              <tr key={index}>
-                <td className="px-6 py-4">
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                      <span className="text-blue-600 font-semibold">{student.name.charAt(0)}</span>
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-900">{student.name}</div>
-                      <div className="text-sm text-gray-500">{student.email}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">{student.rollNo}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">{student.branch}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">{student.btechPercentage}%</td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full ${
-                      student.status === "Placed"
-                        ? "bg-green-100 text-green-800"
-                        : student.status === "Interview"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-blue-100 text-blue-800"
-                    }`}
-                  >
-                    {student.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <button className="text-blue-600 hover:text-blue-800 mr-3">
-                    <i className="fas fa-edit"></i>
-                  </button>
-                  <button className="text-red-600 hover:text-red-800">
-                    <i className="fas fa-trash"></i>
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Modals */}
-      {showAddStudent && <AddStudentModal onClose={() => setShowAddStudent(false)} />}
-      {showDownloadModal && (
-        <DownloadModal type={downloadType} onClose={() => setShowDownloadModal(false)} students={filteredStudents} />
-      )}
-    </div>
+    <Table
+      aria-label="Example table with custom cells"
+      isHeaderSticky
+      bottomContent={bottomContent}
+      bottomContentPlacement="bottom"
+      sortDescriptor={sortDescriptor}
+      onSortChange={setSortDescriptor}
+      topContent={topContent}
+      topContentPlacement="outside"
+    >
+      <TableHeader columns={headerColumns}>
+        {(column) => (
+          <TableColumn key={column.uid} align={column.align} allowsSorting={column.sortable}>
+            {column.name}
+          </TableColumn>
+        )}
+      </TableHeader>
+      <TableBody items={items} loadingState={loading ? "loading" : "idle"}>
+        {(item) => (
+          <TableRow key={item.id}>{(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}</TableRow>
+        )}
+      </TableBody>
+    </Table>
   )
 }
